@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { Pool } = require("pg");
 const { requireEnv } = require("../config/env");
+const { normalizeDatabaseUrl, describeTarget } = require("./databaseUrl");
 
 // Hosted databases like Supabase need SSL; local Postgres doesn't
 const ssl = process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined;
@@ -9,8 +10,9 @@ const ssl = process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } 
 // The one connection pool for the whole app. Every service imports this module.
 // On Vercel each function instance gets its own pool, so keep it to one connection
 // to stay under Supabase's connection limit.
+const connectionString = normalizeDatabaseUrl(requireEnv("DATABASE_URL"));
 const pool = new Pool({
-  connectionString: requireEnv("DATABASE_URL"),
+  connectionString,
   ssl,
   max: process.env.VERCEL ? 1 : 10,
 });
@@ -56,4 +58,9 @@ function closeDB() {
   return pool.end();
 }
 
-module.exports = { query, withTransaction, connectDB, closeDB };
+// Where the pool connects, without the password (safe to print in logs)
+function databaseTarget() {
+  return describeTarget(connectionString);
+}
+
+module.exports = { query, withTransaction, connectDB, closeDB, databaseTarget };

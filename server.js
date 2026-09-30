@@ -9,7 +9,7 @@ async function start() {
   try {
     await connectDB();
   } catch (err) {
-    console.error(`Could not connect to the database: ${err.message}`);
+    console.error(`Could not connect to the database: ${err.message || err.code || err}`);
     console.error("Check DATABASE_URL (in .env locally, or your host's environment variables) and that the database is reachable.");
     process.exit(1);
   }

@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
   try {
     await connectDB();
   } catch (err) {
-    console.error(`Could not connect to the database: ${err.message}`);
+    console.error(`Could not connect to the database: ${err.message || err.code || err}`);
     res.statusCode = 503;
     res.setHeader("Content-Type", "application/json");
     return res.end(JSON.stringify({ error: "Database unavailable" }));
