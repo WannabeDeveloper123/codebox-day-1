@@ -1,4 +1,5 @@
 {
+  "framework": null,
   "installCommand": "npm install && npm --prefix frontend install",
   "buildCommand": "(npm run sync || echo 'Player sync failed; deploying with the data already in the database') && npm run build",
   "outputDirectory": "frontend/dist",
