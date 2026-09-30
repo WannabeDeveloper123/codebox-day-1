@@ -1,9 +1,16 @@
 {
   "installCommand": "npm install && npm --prefix frontend install",
-  "buildCommand": "npm run build",
+  "buildCommand": "(npm run sync || echo 'Player sync failed; deploying with the data already in the database') && npm run build",
   "outputDirectory": "frontend/dist",
   "functions": {
-    "api/index.js": { "includeFiles": "db/schema.sql" }
+    "api/index.js": {
+      "includeFiles": "db/schema.sql"
+    }
   },
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    }
+  ]
 }
