@@ -2,8 +2,23 @@
   "name": "codebox-day-1",
   "version": "1.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js",
+    "dev": "concurrently -n api,web -c green,blue \"npm:dev:api\" \"npm:dev:web\"",
+    "test": "node --test --test-concurrency=1 tests/",
+    "dev:api": "node --watch server.js",
+    "dev:web": "npm --prefix frontend run dev",
+    "setup": "npm install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "sync": "node scripts/sync.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }
