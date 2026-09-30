@@ -7,7 +7,13 @@ const { requireEnv } = require("../config/env");
 const ssl = process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined;
 
 // The one connection pool for the whole app. Every service imports this module.
-const pool = new Pool({ connectionString: requireEnv("DATABASE_URL"), ssl });
+// On Vercel each function instance gets its own pool, so keep it to one connection
+// to stay under Supabase's connection limit.
+const pool = new Pool({
+  connectionString: requireEnv("DATABASE_URL"),
+  ssl,
+  max: process.env.VERCEL ? 1 : 10,
+});
 
 function query(text, params) {
   return pool.query(text, params);
@@ -30,11 +36,20 @@ async function withTransaction(fn) {
   }
 }
 
-// Called once at startup: checks the connection and creates tables if needed
-async function connectDB() {
-  await pool.query("SELECT 1");
-  const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
-  await pool.query(schema);
+let connecting;
+
+// Checks the connection and creates tables if needed. Runs once: later calls reuse
+// the same result, so the Vercel function can call it on every request.
+function connectDB() {
+  connecting ??= (async () => {
+    await pool.query("SELECT 1");
+    const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
+    await pool.query(schema);
+  })().catch((err) => {
+    connecting = undefined; // let the next call try again
+    throw err;
+  });
+  return connecting;
 }
 
 function closeDB() {

@@ -10,7 +10,7 @@ async function start() {
     await connectDB();
   } catch (err) {
     console.error(`Could not connect to the database: ${err.message}`);
-    console.error("Check DATABASE_URL in .env and that Postgres is running.");
+    console.error("Check DATABASE_URL (in .env locally, or your host's environment variables) and that the database is reachable.");
     process.exit(1);
   }
 
